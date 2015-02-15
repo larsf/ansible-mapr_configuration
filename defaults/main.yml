@@ -1,7 +1,7 @@
 ---
 # defaults file for mapr-configuration
 
-mapr_disks: [ '/dev/xvdf', '/dev/xvdg' ]
+mapr_disks: [ '/dev/xvdf' ]
 java_home: /etc/alternatives/java_sdk
 cluster_name: my.cluster.com
 metrics_user: maprmetrics
