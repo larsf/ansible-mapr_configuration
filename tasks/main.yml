@@ -62,6 +62,13 @@
     creates: /opt/mapr/conf/mapr-cluster.conf
   when: inventory_hostname in groups["cluster"]
 
+- name: configure edge nodes
+  command: /tmp/do_configure.sh
+  args:
+    chdir: /tmp
+    creates: /opt/mapr/conf/mapr-cluster.conf
+  when: inventory_hostname in groups["edge"]
+
 - name: get the disk list
   shell: /opt/mapr/server/disklist.sh
   register: disklist
