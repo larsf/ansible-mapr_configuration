@@ -1,7 +1,7 @@
 ---
 - assert:
   that:
-    - {{item}} in ansible_devices
+    - "{{item}} in ansible_devices"
   with_items: "{{mapr_disks}}"
 
 - name: write configure script (genkeys)
