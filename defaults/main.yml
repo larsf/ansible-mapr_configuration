@@ -1,0 +1,11 @@
+---
+# defaults file for mapr-configuration
+
+mapr_disks: [ '/dev/xvdf', '/dev/xvdg' ]
+java_home: '/etc/alternatives/java_sdk'
+cluster_name: '{{mapr_cluster_name}}'
+metrics_user: maprmetrics
+metrics_password: mapr
+metrics_host: "{{ groups['hiveserver'] | first }}"
+secure_cluster: false
+mapr_subnets: 

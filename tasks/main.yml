@@ -1,0 +1,55 @@
+---
+- name: write configure script (genkeys)
+  template: src=do_configure_sh_genkeys.j2 dest=/tmp/do_configure_genkeys.sh mode=0700 owner=root group=root
+
+- name: write configure script (configure)
+  template: src=do_configure_sh.j2 dest=/tmp/do_configure.sh mode=0700 owner=root group=root
+
+- name: stat /opt/mapr/conf/env.sh
+  stat: path=/opt/mapr/conf/env.sh 
+  register: env_sh
+
+- name: configure env.sh with JAVA_HOME
+  lineinfile: dest=/opt/mapr/conf/env.sh regexp="^export JAVA_HOME" state=present line="export JAVA_HOME={{java_home}}"
+  when: env_sh.stat.exists
+
+- name: configure env.sh with MAPR_SUBNETS, if set
+  lineinfile: dest=/opt/mapr/conf/env.sh regexp="export MAPR_SUBNETS" line="export MAPR_SUBNETS={{mapr_subnets}}"
+  when: env_sh.stat.exists and mapr_subnets is defined
+
+- name: write out disk config
+  template: src=disks.txt.j2 dest=/tmp/disks.txt mode=0644 owner=root group=root
+
+- name: generate keys
+  command: creates=/opt/mapr/conf/cldb.key /tmp/do_configure_genkeys.sh
+  run_once: true
+  when: inventory_hostname == groups['cldb'][0] and secure_cluster is defined and secure_cluster == True 
+
+- name: fetch the generated files
+  fetch: src='{{item}}' dest=/tmp/ flat=yes
+  with_items:
+    - /opt/mapr/conf/cldb.key
+    - /opt/mapr/conf/maprserverticket
+    - /opt/mapr/conf/ssl_keystore
+    - /opt/mapr/conf/ssl_truststore
+  when: inventory_hostname == groups['cldb'][0] and secure_cluster is defined and secure_cluster == True
+
+- name: copy cldb.key
+  copy: src=/tmp/cldb.key dest=/opt/mapr/conf mode=0600 owner=mapr group=mapr
+  when: (inventory_hostname in groups['cldb'] or inventory_hostname in groups['zookeepers]) and secure_cluster is defined and secure_cluster == True
+
+- name: copy maprserverticket, ssl_keystore, and ssl_truststore
+  copy: src='/tmp/{{item}}' dest=/opt/mapr/conf mode=0600 owner=mapr group=mapr
+  with_items:
+    - maprserverticket
+    - ssl_keystore
+    - ssl_truststore
+  when: secure_cluster is defined and secure_cluster == True
+
+- name: copy ssl_truststore to edge nodes
+  copy: src='/tmp/{{item}}' dest=/opt/mapr/conf mode=0600 owner=mapr group=mapr
+  with_items:
+    - ssl_keystore
+    - ssl_truststore
+    - maprserverticket
+  when: inventory_hostname in groups['edge'] and secure_cluster is defined and secure_cluster == True
