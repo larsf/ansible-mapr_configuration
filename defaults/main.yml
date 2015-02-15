@@ -8,4 +8,5 @@ metrics_user: maprmetrics
 metrics_password: mapr
 metrics_host: "{{ groups['hiveserver'] | first }}"
 secure_cluster: false
-mapr_subnets: 
+mapr_subnets:
+mapr_version: v4.0.2
