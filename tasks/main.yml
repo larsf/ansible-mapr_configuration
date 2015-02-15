@@ -36,7 +36,7 @@
 
 - name: copy cldb.key
   copy: src=/tmp/cldb.key dest=/opt/mapr/conf mode=0600 owner=mapr group=mapr
-  when: (inventory_hostname in groups['cldb'] or inventory_hostname in groups['zookeepers]) and secure_cluster is defined and secure_cluster == True
+  when: (inventory_hostname in groups["cldb"] or inventory_hostname in groups["zookeepers"]) and secure_cluster is defined and secure_cluster == True
 
 - name: copy maprserverticket, ssl_keystore, and ssl_truststore
   copy: src='/tmp/{{item}}' dest=/opt/mapr/conf mode=0600 owner=mapr group=mapr
