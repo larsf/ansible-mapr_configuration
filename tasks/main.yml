@@ -53,3 +53,19 @@
     - ssl_truststore
     - maprserverticket
   when: inventory_hostname in groups['edge'] and secure_cluster is defined and secure_cluster == True
+
+- name: configure cluster nodes
+  command: /tmp/do_configure.sh
+  args:
+    chdir: /tmp
+    creates: /opt/mapr/conf/mapr-cluster.conf
+  when: inventory_hostname in groups["cluster"]
+
+- name: get the disk list
+  shell: /opt/mapr/server/disklist.sh
+  register: disklist
+  when: inventory_hostname in groups["cluster"]
+
+- name: disksetup -F (to format disks for MFS)
+  command: creates=/opt/mapr/conf/disktab /opt/mapr/server/disksetup -F /tmp/disks.txt
+  when: inventory_hostname in groups["cluster"] and "disklist is defined and disklist.stdout.find('MapR-FS') == -1"
