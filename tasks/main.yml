@@ -24,20 +24,21 @@
 - name: generate keys
   command: creates=/opt/mapr/conf/cldb.key /tmp/do_configure_genkeys.sh
   run_once: true
-  when: inventory_hostname == groups['cldb'][0] and secure_cluster is defined and secure_cluster == True 
+  when: inventory_hostname in groups['cldb'] and secure_cluster is defined and secure_cluster == "True"
 
 - name: fetch the generated files
-  fetch: src='{{item}}' dest=/tmp/ flat=yes
+  fetch: src='{{item}}' dest=/tmp/ flat=yes fail_on_missing=yes
+  run_once: true
   with_items:
     - /opt/mapr/conf/cldb.key
     - /opt/mapr/conf/maprserverticket
     - /opt/mapr/conf/ssl_keystore
     - /opt/mapr/conf/ssl_truststore
-  when: inventory_hostname == groups['cldb'][0] and secure_cluster is defined and secure_cluster == True
+  when: secure_cluster is defined and secure_cluster == "True"
 
 - name: copy cldb.key
   copy: src=/tmp/cldb.key dest=/opt/mapr/conf mode=0600 owner=mapr group=mapr
-  when: (inventory_hostname in groups["cldb"] or inventory_hostname in groups["zookeepers"]) and secure_cluster is defined and secure_cluster == True
+  when: (inventory_hostname in groups["cldb"] or inventory_hostname in groups["zookeepers"]) and secure_cluster is defined and secure_cluster == "True"
 
 - name: copy maprserverticket, ssl_keystore, and ssl_truststore
   copy: src='/tmp/{{item}}' dest=/opt/mapr/conf mode=0600 owner=mapr group=mapr
@@ -45,7 +46,7 @@
     - maprserverticket
     - ssl_keystore
     - ssl_truststore
-  when: secure_cluster is defined and secure_cluster == True
+  when: secure_cluster is defined and secure_cluster == "True"
 
 - name: copy ssl_truststore to edge nodes
   copy: src='/tmp/{{item}}' dest=/opt/mapr/conf mode=0600 owner=mapr group=mapr
@@ -53,7 +54,7 @@
     - ssl_keystore
     - ssl_truststore
     - maprserverticket
-  when: inventory_hostname in groups['edge'] and secure_cluster is defined and secure_cluster == True
+  when: inventory_hostname in groups['edge'] and secure_cluster is defined and secure_cluster == "True"
 
 - name: configure cluster nodes
   command: /tmp/do_configure.sh
