@@ -40,13 +40,19 @@
   copy: src=/tmp/cldb.key dest=/opt/mapr/conf mode=0600 owner=mapr group=mapr
   when: (inventory_hostname in groups["cldb"] or inventory_hostname in groups["zookeepers"]) and secure_cluster is defined and secure_cluster == "True"
 
-- name: copy maprserverticket, ssl_keystore, and ssl_truststore
+- name: copy ssl_truststore (mode 0644)
+  copy: src='/tmp/{{item}}' dest=/opt/mapr/conf mode=0644 owner=mapr group=mapr
+  with_items:
+    - ssl_truststore
+  when: secure_cluster is defined and secure_cluster == "True"
+
+- name: copy maprserverticket, ssl_keystore (mode 0600)
   copy: src='/tmp/{{item}}' dest=/opt/mapr/conf mode=0600 owner=mapr group=mapr
   with_items:
     - maprserverticket
     - ssl_keystore
-    - ssl_truststore
   when: secure_cluster is defined and secure_cluster == "True"
+
 
 - name: copy ssl_truststore to edge nodes
   copy: src='/tmp/{{item}}' dest=/opt/mapr/conf mode=0600 owner=mapr group=mapr
