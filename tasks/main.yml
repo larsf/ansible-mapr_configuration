@@ -79,6 +79,7 @@
 - name: get the disk list
   shell: /opt/mapr/server/disklist.sh
   register: disklist
+  changed_when: false
   when: inventory_hostname in groups["cluster"]
 
 - name: disksetup -F (to format disks for MFS)
