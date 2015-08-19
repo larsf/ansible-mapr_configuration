@@ -64,6 +64,7 @@
 
 - name: remove the fetched files
   local_action: file path={{item}} state=absent
+  run_once: yes
   with_items:
     - /tmp/ssl_keystore
     - /tmp/ssl_truststore
