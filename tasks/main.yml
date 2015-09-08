@@ -1,9 +1,11 @@
 ---
 
 - name: write configure script (genkeys)
+  sudo_user: root
   template: src=do_configure_sh_genkeys.j2 dest=/tmp/do_configure_genkeys.sh mode=0700 owner=root group=root
 
 - name: write configure script (configure)
+  sudo_user: root
   template: src=do_configure_sh.j2 dest=/tmp/do_configure.sh mode=0700 owner=root group=root
 
 - name: stat /opt/mapr/conf/env.sh
@@ -11,22 +13,27 @@
   register: env_sh
 
 - name: configure env.sh with JAVA_HOME
+  sudo_user: root
   lineinfile: dest=/opt/mapr/conf/env.sh regexp="^export JAVA_HOME" state=present line="export JAVA_HOME={{java_home}}"
   when: env_sh.stat.exists
 
 - name: configure env.sh with MAPR_SUBNETS, if set
+  sudo_user: root
   lineinfile: dest=/opt/mapr/conf/env.sh regexp="export MAPR_SUBNETS" line="export MAPR_SUBNETS={{mapr_subnets}}"
   when: env_sh.stat.exists and mapr_subnets is defined
 
 - name: write out disk config
+  sudo_user: root
   template: src=disks.txt.j2 dest=/tmp/disks.txt mode=0644 owner=root group=root
 
 - name: generate keys
+  sudo_user: root
   command: creates=/opt/mapr/conf/cldb.key /tmp/do_configure_genkeys.sh
   run_once: true
   when: inventory_hostname in groups['cldb'] and secure_cluster is defined and secure_cluster == "True"
 
 - name: fetch the generated files
+  sudo_user: root
   fetch: src='{{item}}' dest=/tmp/ flat=yes fail_on_missing=yes
   run_once: true
   with_items:
@@ -37,17 +44,20 @@
   when: secure_cluster is defined and secure_cluster == "True"
 
 - name: copy cldb.key
-  copy: src=/tmp/cldb.key dest=/opt/mapr/conf mode=0600 owner=mapr group=mapr
+  sudo_user: root
+  copy: src=/tmp/cldb.key dest=/opt/mapr/conf mode=0600 owner='{{mapr_admin_username}}' group='{{mapr_admin_username}}'
   when: (inventory_hostname in groups["cldb"] or inventory_hostname in groups["zookeepers"]) and secure_cluster is defined and secure_cluster == "True"
 
 - name: copy ssl_truststore (mode 0644)
-  copy: src='/tmp/{{item}}' dest=/opt/mapr/conf mode=0644 owner=mapr group=mapr
+  sudo_user: root
+  copy: src='/tmp/{{item}}' dest=/opt/mapr/conf mode=0644 owner='{{mapr_admin_username}}' group='{{mapr_admin_username}}'
   with_items:
     - ssl_truststore
   when: secure_cluster is defined and secure_cluster == "True"
 
 - name: copy maprserverticket, ssl_keystore (mode 0600)
-  copy: src='/tmp/{{item}}' dest=/opt/mapr/conf mode=0600 owner=mapr group=mapr
+  sudo_user: root
+  copy: src='/tmp/{{item}}' dest=/opt/mapr/conf mode=0600 owner='{{mapr_admin_username}}' group='{{mapr_admin_username}}'
   with_items:
     - maprserverticket
     - ssl_keystore
@@ -55,6 +65,7 @@
 
 
 - name: copy ssl_truststore to edge nodes
+  sudo_user: root
   copy: src='/tmp/{{item}}' dest=/opt/mapr/conf mode=0600 owner=mapr group=mapr
   with_items:
     - ssl_keystore
@@ -72,6 +83,7 @@
     - /tmp/cldb.key
 
 - name: configure cluster nodes
+  sudo_user: root
   command: /tmp/do_configure.sh
   args:
     chdir: /tmp
@@ -79,6 +91,7 @@
   when: inventory_hostname in groups["cluster"]
 
 - name: configure edge nodes
+  sudo_user: root
   command: /tmp/do_configure.sh
   args:
     chdir: /tmp
@@ -86,11 +99,13 @@
   when: inventory_hostname in groups["edge"]
 
 - name: get the disk list
+  sudo_user: root
   shell: /opt/mapr/server/disklist.sh
   register: disklist
   changed_when: false
   when: inventory_hostname in groups["cluster"]
 
 - name: disksetup -F (to format disks for MFS)
+  sudo_user: root
   command: creates=/opt/mapr/conf/disktab /opt/mapr/server/disksetup -F /tmp/disks.txt
   when: inventory_hostname in groups["cluster"] and "disklist is defined and disklist.stdout.find('MapR-FS') == -1"
