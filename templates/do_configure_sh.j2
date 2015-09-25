@@ -5,7 +5,9 @@
 	-Z {% for node in groups['zookeepers'] -%}{{ hostvars[node].ansible_fqdn }}{% if not loop.last %},{% endif %}{% endfor %} \
 	-N {{cluster_name}} {% if ansible_virtualization_role == "guest" %}--isvm{% endif %} \
 {% if not mapr_version.startswith('v3') %}
+	{% if mapr_version.startswith('v4.0.1') %}
 	-RM {% for node in groups['resourcemanager'] -%}{{hostvars[node].ansible_fqdn }}{% if not loop.last %},{% endif %}{% endfor %} \
+	{% endif %}
 	-HS {% for node in groups['historyserver'] -%}{{hostvars[node].ansible_fqdn }}{% if not loop.last %},{% endif %}{% endfor %} \
 	-on-prompt-cont y \
 {% endif %}
