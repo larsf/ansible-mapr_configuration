@@ -30,7 +30,7 @@
   sudo_user: root
   command: creates=/opt/mapr/conf/cldb.key /tmp/do_configure_genkeys.sh
   run_once: true
-  when: inventory_hostname in groups['cldb'] and secure_cluster is defined and secure_cluster == "True"
+  when: inventory_hostname in groups['cldb'] and secure_cluster is defined and secure_cluster == True
 
 - name: fetch the generated files
   sudo_user: root
@@ -41,19 +41,19 @@
     - /opt/mapr/conf/maprserverticket
     - /opt/mapr/conf/ssl_keystore
     - /opt/mapr/conf/ssl_truststore
-  when: secure_cluster is defined and secure_cluster == "True"
+  when: secure_cluster is defined and secure_cluster == True
 
 - name: copy cldb.key
   sudo_user: root
   copy: src=/tmp/cldb.key dest=/opt/mapr/conf mode=0600 owner='{{mapr_admin_username}}' group='{{mapr_admin_username}}'
-  when: (inventory_hostname in groups["cldb"] or inventory_hostname in groups["zookeepers"]) and secure_cluster is defined and secure_cluster == "True"
+  when: (inventory_hostname in groups["cldb"] or inventory_hostname in groups["zookeepers"]) and secure_cluster is defined and secure_cluster == True
 
 - name: copy ssl_truststore (mode 0644)
   sudo_user: root
   copy: src='/tmp/{{item}}' dest=/opt/mapr/conf mode=0644 owner='{{mapr_admin_username}}' group='{{mapr_admin_username}}'
   with_items:
     - ssl_truststore
-  when: secure_cluster is defined and secure_cluster == "True"
+  when: secure_cluster is defined and secure_cluster == True
 
 - name: copy maprserverticket, ssl_keystore (mode 0600)
   sudo_user: root
@@ -61,7 +61,7 @@
   with_items:
     - maprserverticket
     - ssl_keystore
-  when: secure_cluster is defined and secure_cluster == "True"
+  when: secure_cluster is defined and secure_cluster == True
 
 
 - name: copy ssl_truststore to edge nodes
@@ -71,7 +71,7 @@
     - ssl_keystore
     - ssl_truststore
     - maprserverticket
-  when: inventory_hostname in groups['edge'] and secure_cluster is defined and secure_cluster == "True"
+  when: inventory_hostname in groups['edge'] and secure_cluster is defined and secure_cluster == True
 
 - name: remove the fetched files
   local_action: file path={{item}} state=absent
