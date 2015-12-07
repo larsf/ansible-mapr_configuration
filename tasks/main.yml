@@ -63,13 +63,11 @@
     - ssl_keystore
   when: secure_cluster is defined and secure_cluster == True
 
-
-- name: copy ssl_truststore to edge nodes
+- name: copy keystore and server ticket to edge nodes
   sudo_user: root
   copy: src='/tmp/{{item}}' dest=/opt/mapr/conf mode=0600 owner=mapr group=mapr
   with_items:
     - ssl_keystore
-    - ssl_truststore
     - maprserverticket
   when: inventory_hostname in groups['edge'] and secure_cluster is defined and secure_cluster == True
 
