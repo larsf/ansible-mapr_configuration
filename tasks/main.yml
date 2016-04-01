@@ -46,7 +46,7 @@
 - name: copy cldb.key
   sudo_user: root
   copy: src=/tmp/cldb.key dest=/opt/mapr/conf mode=0600 owner='{{mapr_admin_username}}' group='{{mapr_admin_username}}'
-  when: (inventory_hostname in groups["cldb"] or inventory_hostname in groups["zookeepers"]) and secure_cluster is defined and secure_cluster == True
+  when: (inventory_hostname in groups["cldb"] or inventory_hostname in groups["zookeeper"]) and secure_cluster is defined and secure_cluster == True
 
 - name: copy ssl_truststore (mode 0644)
   sudo_user: root
