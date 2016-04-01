@@ -43,4 +43,4 @@ MIT
 Author Information
 ------------------
 
-vgonzalez@mapr.com
+Vince Gonzalez
