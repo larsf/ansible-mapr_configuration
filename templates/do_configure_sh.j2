@@ -9,7 +9,7 @@
 {% else %}
 	-HS {% for node in groups['historyserver'] -%}{{hostvars[node].ansible_fqdn }}{% if not loop.last %},{% endif %}{% endfor %} \
 {% endif %}
-{% if mapr_version.startswith('v4.0.1') or hue_enabled %}
+{% if mapr_version.startswith('v4.0.1') %}
 	-RM {% for node in groups['resourcemanager'] -%}{{hostvars[node].ansible_fqdn }}{% if not loop.last %},{% endif %}{% endfor %} \
 {% endif %}
 	-on-prompt-cont y {% if classic_enabled %} -du {{metrics_user}} -dp {{metrics_password}} -d {{hostvars[metrics_host].ansible_fqdn}} {% endif %}
