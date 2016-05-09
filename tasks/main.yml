@@ -105,5 +105,5 @@
 
 - name: disksetup -F (to format disks for MFS)
   sudo_user: root
-  command: creates=/opt/mapr/conf/disktab /opt/mapr/server/disksetup -F /tmp/disks.txt
+  command: creates=/opt/mapr/conf/disktab /opt/mapr/server/disksetup -F {% if storage_pool_width is defined %}-W {{storage_pool_width}}{% endif %} /tmp/disks.txt
   when: inventory_hostname in groups["cluster"] and "disklist is defined and disklist.stdout.find('MapR-FS') == -1"
