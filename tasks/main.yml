@@ -17,7 +17,7 @@
 - name: configure env.sh with JAVA_HOME
   become: yes
   become_user: root
-  lineinfile: dest=/opt/mapr/conf/env.sh regexp="^export JAVA_HOME" state=present line="export JAVA_HOME={{java_home}}"
+  lineinfile: dest=/opt/mapr/conf/env.sh state=present line="export JAVA_HOME={{java_home}}" insertafter='#set JAVA_HOME to override default search'
   when: env_sh.stat.exists
 
 - name: configure env.sh with MAPR_SUBNETS, if set
